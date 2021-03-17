@@ -4,7 +4,10 @@
 (tooltip-mode -1)
 (set-fringe-mode 10) ;Breathing room
 (menu-bar-mode -1)
+(fset 'yes-or-no-p 'y-or-n-p)
 (setq visible-bell t)
+
+(setenv "BROWSER" "firefox")t
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -37,7 +40,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(use-package)))
+ '(package-selected-packages '(doom-modeline ivy use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -45,3 +48,26 @@
  ;; If there is more than one, they won't work right.
  )
 
+;; Ivy
+(use-package ivy
+  :diminish
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
+
+;; Modeline
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
