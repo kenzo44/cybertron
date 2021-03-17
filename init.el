@@ -12,6 +12,9 @@
 ;; Default theme temp
 (load-theme 'tango-dark)
 
+;; Quality of Life
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
 ;; Initialize package sources
 (require 'package)
 
@@ -41,3 +44,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
