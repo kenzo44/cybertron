@@ -37,23 +37,29 @@
 (use-package "window"
   :ensure nil
   :preface
-  (defun ian/split-and-follow-horizontally ()
+  (defun kenzo/split-and-follow-horizontally ()
     "Split window below."
     (interactive)
     (split-window-below)
     (other-window 1))
-  (defun ian/split-and-follow-vertically ()
+  (defun kenzo/split-and-follow-vertically ()
     "Split window right."
     (interactive)
     (split-window-right)
     (other-window 1))
   :config
   (setq split-width-threshold 100)
-  (global-set-key (kbd "C-x 2") #'ian/split-and-follow-horizontally)
-  (global-set-key (kbd "C-x 3") #'ian/split-and-follow-vertically))
+  (global-set-key (kbd "C-x 2") #'kenzo/split-and-follow-horizontally)
+  (global-set-key (kbd "C-x 3") #'kenzo/split-and-follow-vertically))
 
 (column-number-mode)
-(setq display-line-numbers 'relative)
+;; Global Line number
+(add-hook 'conf-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(setq-default
+ display-line-numbers-type 'relative
+ display-line-numbers-width 2)
 ;; Overwrite when pasting
 (delete-selection-mode 1)
 ;; Wrap lines
@@ -141,34 +147,6 @@
     (with-current-buffer
         (get-buffer candidate)
       (all-the-icons-icon-for-mode major-mode)))
-  :init
-  (setq ivy-rich-display-transformers-list ; max column width sum = (ivy-poframe-width - 1)
-        '(ivy-switch-buffer
-          (:columns
-           ((ivy-rich-switch-buffer-icon (:width 2))
-            (ivy-rich-candidate (:width 35))
-            (ivy-rich-switch-buffer-project (:width 15 :face success))
-            (ivy-rich-switch-buffer-major-mode (:width 13 :face warning)))
-           :predicate
-           #'(lambda (cand) (get-buffer cand)))
-          counsel-M-x
-          (:columns
-           ((counsel-M-x-transformer (:width 35))
-            (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
-          counsel-describe-function
-          (:columns
-           ((counsel-describe-function-transformer (:width 35))
-            (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
-          counsel-describe-variable
-          (:columns
-           ((counsel-describe-variable-transformer (:width 35))
-            (ivy-rich-counsel-variable-docstring (:width 34 :face font-lock-doc-face))))
-          package-install
-          (:columns
-           ((ivy-rich-candidate (:width 25))
-            (ivy-rich-package-version (:width 12 :face font-lock-comment-face))
-            (ivy-rich-package-archive-summary (:width 7 :face font-lock-builtin-face))
-            (ivy-rich-package-install-summary (:width 23 :face font-lock-doc-face))))))
   :config
   (ivy-rich-mode +1)
   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
