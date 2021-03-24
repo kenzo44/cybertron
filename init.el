@@ -16,6 +16,9 @@
 
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
+;; Bad fix - delete after bug fix
+(setq warning-minimum-level :emergency)
+
 ;; Initialize package sources
 (require 'package)
 
