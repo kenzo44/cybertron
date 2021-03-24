@@ -1,7 +1,7 @@
 ;;; init.el --- Project Cybertron
 ;; Author: Kenish
 ;;; Commentary:
-;;; Not sure ye
+;;; The Ultimate Emacs Setup!
 ;;; Code:
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -69,7 +69,7 @@
 (global-visual-line-mode t)
 
 ;; Default theme temp
-(load-theme 'tango-dark)
+(load-theme 'wombat)
 
 ;; Quality of Life
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
