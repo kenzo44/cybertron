@@ -1,35 +1,28 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    paths-ignore:
-    - '**.md'
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    if: false
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         emacs_version:
-          - 25.1
-          - 25.2
-          - 25.3
-          - 26.1
-          - 26.2
           - 26.3
           - 27.1
-          - snapshot
         include:
-          - os: macos-latest
-            emacs_version: 27.1
+          - emacs_version: 26.3
+            lint_ignore: 1
+    env:
+      EMACS_LINT_IGNORE: ${{ matrix.lint_ignore }}
     steps:
-    - uses: purcell/setup-emacs@master
-      with:
-        version: ${{ matrix.emacs_version }}
-
-    - uses: actions/checkout@v2
-    - name: Check startup
-      run: ./test-startup.sh
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
