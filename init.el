@@ -221,7 +221,13 @@
   :ensure t
   :config
   (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
+
 (show-paren-mode t)
+;; Always ask for y/n keypress instead of typing out 'yes' or 'no'
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;;; init.el ends here
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
