@@ -71,6 +71,13 @@
 ;; Default theme temp
 (load-theme 'wombat)
 
+;; Helper function to open file in sudo
+(defun sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+
 ;; Quality of Life
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
