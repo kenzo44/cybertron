@@ -22,7 +22,6 @@ jobs:
           - 26.3
           - 27.1
           - 27.2
-          - 28.0
           - snapshot
         include:
           - os: macos-latest
@@ -32,10 +31,5 @@ jobs:
       with:
         version: ${{ matrix.emacs_version }}
 
-    - uses: actions/checkout@v2
-
     - name: Print emacs version
       run: emacs --version
-
-    - name: Run tests
-      run: make test
