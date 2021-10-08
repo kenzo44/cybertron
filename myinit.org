@@ -52,6 +52,33 @@
 (setq-default default-directory "~/")
 (setenv "BROWSER" "firefox")t
 
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+#+end_src
+
+* Theme
+
+#+begin_src emacs-lisp
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-one t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
 #+end_src
 
 * Quality of Life
@@ -59,10 +86,114 @@
 #+begin_src emacs-lisp
 
 ;; Quality of Life
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
+;; Overwrite when pasting
+(delete-selection-mode 1)
+
+(show-paren-mode t)
+;; Always ask for y/n keypress instead of typing out 'yes' or 'no'
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+#+end_src
+
+* Helper Functions
+
+** Open File in SUDO
+#+begin_src emacs-lisp
+
+(defun sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+
+#+end_src
+
+* Packages
+
+** Window
+
+#+begin_src emacs-lisp
+
+(use-package "window"
+  :ensure nil
+  :preface
+  (defun kenzo/split-and-follow-horizontally ()
+    "Split window below."
+    (interactive)
+    (split-window-below)
+    (other-window 1))
+  (defun kenzo/split-and-follow-vertically ()
+    "Split window right."
+    (interactive)
+    (split-window-right)
+    (other-window 1))
+  :config
+  (setq split-width-threshold 100)
+  (global-set-key (kbd "C-x 2") #'kenzo/split-and-follow-horizontally)
+  (global-set-key (kbd "C-x 3") #'kenzo/split-and-follow-vertically))
+
+#+end_src
+
+** Which Key
+
+#+begin_src emacs-lisp
+
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+
+#+end_src
+
+** Company
+
+#+begin_src emacs-lisp
+
+(use-package company
+  :ensure t
+  :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 3)
+  (global-company-mode t))
+
+#+end_src
+
+** Flycheck
+
+#+begin_src emacs-lisp
+
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode t))
+
+#+end_src
+
+
+** Fun
+*** Nyan Mode
+
+#+begin_src emacs-lisp
+
+(use-package nyan-mode
+  :ensure t
+  :config
+  (setq nyan-wavy-trail 1)
+  (nyan-mode))
+
+#+end_src
+
+*** Doom Modeline
+
+#+begin_src emacs-lisp
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
 
 #+end_src
