@@ -34,6 +34,10 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+;;Linux error
+(require 'gnutls)
+(add-to-list 'gnutls-trustfiles "/usr/local/etc/openssl/cert.pem")
+
 #+end_src
 
 * UI Tweaks
