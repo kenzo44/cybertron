@@ -33,5 +33,3 @@ jobs:
 
     - name: Print emacs version
       run: emacs --version
-    - name: Print emacs init time
-      run: emacs --eval "(message \"Testing...\")"
