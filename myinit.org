@@ -64,9 +64,13 @@
 * Theme
 
 #+begin_src emacs-lisp
+(set-frame-parameter (selected-frame) 'alpha '(96 . 96))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 (use-package doom-themes
-  :ensure t
+  :straight t
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -83,17 +87,18 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1))
+
 #+end_src
 
 * Quality of Life
 
 #+begin_src emacs-lisp
 
-;; Quality of Life
-
+;; ESCAPAYE
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; Overwrite when pasting
 (delete-selection-mode 1)
@@ -101,6 +106,13 @@
 (show-paren-mode t)
 ;; Always ask for y/n keypress instead of typing out 'yes' or 'no'
 (defalias 'yes-or-no-p 'y-or-n-p)
+
+;; Improve Scrolling
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+(setq scroll-step 1) ;; keyboard scroll one line at a time
+(setq use-dialog-box nil) ;; Disable dialog boxes since they weren't working in Mac OSX
 
 #+end_src
 
@@ -119,7 +131,7 @@
 
 * Packages
 
-** Window
+** Window Management
 
 #+begin_src emacs-lisp
 
@@ -140,6 +152,18 @@
   (setq split-width-threshold 100)
   (global-set-key (kbd "C-x 2") #'kenzo/split-and-follow-horizontally)
   (global-set-key (kbd "C-x 3") #'kenzo/split-and-follow-vertically))
+
+(use-package switch-window
+  :straight t
+  :config
+    (setq switch-window-input-style 'minibuffer)
+    (setq switch-window-increase 4)
+    (setq switch-window-threshold 2)
+    (setq switch-window-shortcut-style 'qwerty)
+    (setq switch-window-qwerty-shortcuts
+        '("a" "s" "d" "f" "j" "k" "l" "i" "o"))
+  :bind
+    ([remap other-window] . switch-window))
 
 #+end_src
 
@@ -179,6 +203,19 @@
 #+end_src
 
 
+** Utilities
+*** Aggressive Indent
+
+#+begin_src emacs-lisp
+
+(use-package aggressive-indent
+  :straight t
+  :config
+  )
+
+#+end_src
+
+
 ** Fun
 *** Nyan Mode
 
@@ -205,7 +242,6 @@
 * Result
 
 #+begin_src emacs-lisp
-
 (emacs-uptime)
 (emacs-init-time)
 #+end_src 
