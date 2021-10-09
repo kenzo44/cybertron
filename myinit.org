@@ -418,6 +418,24 @@
   :hook (prog-mode . hes-mode))
 
 (use-package rainbow-mode
-  :hook (prog-mode . rainbow-mode))
+  :straight t
+  :init
+  (add-hook 'prog-mode-hook 'rainbow-mode))
+
+#+end_src
+
+** Yasnippet
+#+begin_src emacs-lisp
+
+(use-package yasnippet
+  :straight t
+  :config
+  (use-package yasnippet-snippets
+  :straight t)
+  (yas-reload-all))
+
+(yas-global-mode 1)
+(add-hook 'yas-minor-mode-hook (lambda ()
+(yas-activate-extra-mode 'fundamental-mode)))
 
 #+end_src
