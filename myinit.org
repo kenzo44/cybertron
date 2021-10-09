@@ -238,6 +238,11 @@
 
 #+begin_src emacs-lisp
 
+(use-package smex
+  :straight t
+  :config
+  (smex))
+
 (use-package counsel
   :hook (ivy-mode . counsel-mode)
   :config
