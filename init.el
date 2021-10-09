@@ -6,3 +6,5 @@
 
 ;; Org hook
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
+
+;;; init.el ends here
