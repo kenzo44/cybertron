@@ -23,15 +23,15 @@
   ;; Bootstrap straight.el
   (defvar bootstrap-version)
   (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 5))
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 5))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
     (load bootstrap-file nil 'nomessage)))
 
 ;; Use straight.el for use-package expressions
@@ -74,7 +74,7 @@
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+	doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-one t)
 
   ;; Enable flashing mode-line on errors
@@ -114,16 +114,29 @@
 ;; Overwrite when pasting
 (delete-selection-mode 1)
 
-(show-paren-mode t)
+;; Smart paren and quotes
+(use-package paren
+  :straight nil
+  :init (setq show-paren-delay 0)
+  :config (show-paren-mode +1))
+
+(use-package elec-pair
+  :straight nil
+  :hook (prog-mode . electric-pair-mode))
+
 ;; Always ask for y/n keypress instead of typing out 'yes' or 'no'
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; Improve Scrolling
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
-(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-(setq scroll-step 1) ;; keyboard scroll one line at a time
-(setq use-dialog-box nil) ;; Disable dialog boxes since they weren't working in Mac OSX
+;; Scrolling
+(use-package mwheel
+  :straight nil
+  :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
+		mouse-wheel-progressive-speed nil))
+
+;; Clean whitespace on save
+(use-package whitespace
+  :straight nil
+  :hook (before-save . whitespace-cleanup))
 
 #+end_src
 
@@ -172,10 +185,10 @@
   (setq ivy-height 12)
   (setq ivy-display-style nil)
   (setq ivy-re-builders-alist
-        '((counsel-rg            . ivy--regex-plus)
-          (counsel-projectile-rg . ivy--regex-plus)
-          (swiper                . ivy--regex-plus)
-          (t                     . ivy--regex-fuzzy)))
+	'((counsel-rg            . ivy--regex-plus)
+	  (counsel-projectile-rg . ivy--regex-plus)
+	  (swiper                . ivy--regex-plus)
+	  (t                     . ivy--regex-fuzzy)))
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-initial-inputs-alist nil)
@@ -187,12 +200,12 @@
   :after (prescient ivy counsel)
   :config
   (setq ivy-prescient-sort-commands
-        '(:not swiper
-               counsel-grep
-               counsel-rg
-               counsel-projectile-rg
-               ivy-switch-buffer
-               counsel-switch-buffer))
+	'(:not swiper
+	       counsel-grep
+	       counsel-rg
+	       counsel-projectile-rg
+	       ivy-switch-buffer
+	       counsel-switch-buffer))
   (setq ivy-prescient-retain-classic-highlighting t)
   (ivy-prescient-mode +1))
 
@@ -209,15 +222,6 @@
 **** Fancy Ivy
 
 #+begin_src emacs-lisp
-
-(use-package ivy-posframe
-  :demand t
-  :after ivy
-  :custom
-  (ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-  :config
-  (ivy-posframe-mode))
-
 
 (use-package all-the-icons-ivy-rich
   :straight t
@@ -313,7 +317,7 @@
     (setq switch-window-threshold 2)
     (setq switch-window-shortcut-style 'qwerty)
     (setq switch-window-qwerty-shortcuts
-        '("a" "s" "d" "f" "j" "k" "l" "i" "o"))
+	'("a" "s" "d" "f" "j" "k" "l" "i" "o"))
   :bind
     ([remap other-window] . switch-window))
 
@@ -396,5 +400,19 @@
 (use-package doom-modeline
   :straight t
   :init (doom-modeline-mode 1))
+
+#+end_src
+* Programming
+** Syntax highlighting
+#+begin_src emacs-lisp
+
+(use-package highlight-numbers
+  :hook (prog-mode . highlight-numbers-mode))
+
+(use-package highlight-escape-sequences
+  :hook (prog-mode . hes-mode))
+
+(use-package rainbow-mode
+  :hook (prog-mode . rainbow-mode))
 
 #+end_src
