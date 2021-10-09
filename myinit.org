@@ -138,6 +138,12 @@
   :straight nil
   :hook (before-save . whitespace-cleanup))
 
+;; Highlights cursor position
+(use-package beacon
+  :straight t
+  :config
+  (beacon-mode 1))
+
 #+end_src
 
 * Helper Functions
@@ -173,123 +179,99 @@
 #+end_src
 
 
-** Searching/Sorting/File Management
-*** Ivy
-**** Ivy Mode
+** Searching/Sorting/File Management using Vertico
+
+*** Vertico
 #+begin_src emacs-lisp
-
-(use-package ivy
-  :hook (after-init . ivy-mode)
-  :config
-  (setcdr (assoc t ivy-format-functions-alist) #'ivy-format-function-line)
-  (setq ivy-height 12)
-  (setq ivy-display-style nil)
-  (setq ivy-re-builders-alist
-	'((counsel-rg            . ivy--regex-plus)
-	  (counsel-projectile-rg . ivy--regex-plus)
-	  (swiper                . ivy--regex-plus)
-	  (t                     . ivy--regex-fuzzy)))
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-initial-inputs-alist nil)
-  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
-  (define-key ivy-mode-map       (kbd "<escape>") nil)
-  (define-key ivy-minibuffer-map (kbd "<escape>") #'minibuffer-keyboard-quit))
-
-(use-package ivy-prescient
-  :after (prescient ivy counsel)
-  :config
-  (setq ivy-prescient-sort-commands
-	'(:not swiper
-	       counsel-grep
-	       counsel-rg
-	       counsel-projectile-rg
-	       ivy-switch-buffer
-	       counsel-switch-buffer))
-  (setq ivy-prescient-retain-classic-highlighting t)
-  (ivy-prescient-mode +1))
-
-(ivy-mode)
-(setq enable-recursive-minibuffers t)
-;; enable this if you want `swiper' to use it
-;; (setq search-default-mode #'char-fold-to-regexp)
-(global-set-key "\C-s" 'swiper)
-(global-set-key (kbd "C-c C-r") 'ivy-resume)
-(global-set-key (kbd "<f6>") 'ivy-resume)
-(global-set-key (kbd "M-x") 'counsel-M-x)
-
-#+end_src
-**** Fancy Ivy
-
-#+begin_src emacs-lisp
-
-(use-package all-the-icons-ivy-rich
+(use-package vertico
   :straight t
-  :init (all-the-icons-ivy-rich-mode 1))
+  :bind (:map vertico-map
+	 ("C-j" . vertico-next)
+	 ("C-k" . vertico-previous)
+	 ("C-f" . vertico-exit)
+	 :map minibuffer-local-map
+	 ("M-h" . backward-kill-word))
+  :custom
+  (vertico-cycle t)
+  :init
+  (vertico-mode))
 
-(use-package ivy-rich
-  :after (counsel-projectile)
-  :config
-  (ivy-rich-mode 1))
+;; Saves search history for counsel
+(use-package savehist
+  :init
+  (savehist-mode))
 
-#+end_src
-
-*** Counsel
-
-#+begin_src emacs-lisp
-
-(use-package smex
+;; Describes each smex function
+(use-package marginalia
+  :after vertico
   :straight t
-  :config
-  (smex))
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
 
-(use-package counsel
-  :hook (ivy-mode . counsel-mode)
-  :config
-  (setq counsel-rg-base-command "rg --vimgrep %s")
-  (global-set-key (kbd "s-P") #'counsel-M-x)
-  (global-set-key (kbd "C-S-p") #'counsel-M-x)
-  (global-set-key (kbd "s-f") #'counsel-grep-or-swiper)
-  (global-set-key (kbd "C-s") #'counsel-grep-or-swiper))
+;; Can't live without this
+(use-package orderless
+  :straight t
+  :custom (completion-styles '(orderless)))
 
-(use-package counsel-projectile
-  :config
-  (counsel-projectile-mode +1))
+;; A few more useful configurations...
+(use-package emacs
+  :init
+  ;; Add prompt indicator to `completing-read-multiple'.
+  ;; Alternatively try `consult-completing-read-multiple'.
+  (defun crm-indicator (args)
+    (cons (concat "[CRM] " (car args)) (cdr args)))
+  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+  ;; Do not allow the cursor in the minibuffer prompt
+  (setq minibuffer-prompt-properties
+	'(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  ;; Vertico commands are hidden in normal buffers.
+  ;; (setq read-extended-command-predicate
+  ;;       #'command-completion-default-include-p)
+
+  ;; Enable recursive minibuffers
+  (setq enable-recursive-minibuffers t))
 
 #+end_src
 
-*** Swiper
+*** Embark
 
 #+begin_src emacs-lisp
 
-(use-package swiper
-  :after ivy
+;; In short enables a right click
+(use-package embark
+  :straight t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
   :config
-  (setq swiper-action-recenter t)
-  (setq swiper-goto-start-of-match t))
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		 nil
+		 (window-parameters (mode-line-format . none)))))
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :straight t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
-(setq swiper-use-visual-line nil)
-(setq swiper-use-visual-line-p (lambda (a) nil))
 #+end_src
 
-*** Projectile
 
-#+begin_src emacs-lisp
-
-(use-package projectile
-  :config
-  (setq projectile-sort-order 'recentf)
-  (setq projectile-indexing-method 'hybrid)
-  (setq projectile-completion-system 'ivy)
-  (setq projectile-mode-line-prefix " ")
-  (projectile-mode +1)
-  (define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
-  (define-key projectile-mode-map (kbd "s-p") #'projectile-find-file)
-  (define-key projectile-mode-map (kbd "C-p") #'projectile-find-file)
-  (define-key projectile-mode-map (kbd "s-F") #'projectile-ripgrep)
-  (define-key projectile-mode-map (kbd "C-S-f") #'projectile-ripgrep))
-
-#+end_src
 
 
 ** Window Management
@@ -407,6 +389,7 @@
   :init (doom-modeline-mode 1))
 
 #+end_src
+
 * Programming
 ** Syntax highlighting
 #+begin_src emacs-lisp
