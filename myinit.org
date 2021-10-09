@@ -108,6 +108,9 @@
 ;; ESCAPAYE
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
+;; Wrap lines
+(global-visual-line-mode t)
+
 ;; Overwrite when pasting
 (delete-selection-mode 1)
 
@@ -156,6 +159,130 @@
 
 #+end_src
 
+
+** Searching/Sorting/File Management
+*** Ivy
+**** Ivy Mode
+#+begin_src emacs-lisp
+
+(use-package ivy
+  :hook (after-init . ivy-mode)
+  :config
+  (setcdr (assoc t ivy-format-functions-alist) #'ivy-format-function-line)
+  (setq ivy-height 12)
+  (setq ivy-display-style nil)
+  (setq ivy-re-builders-alist
+        '((counsel-rg            . ivy--regex-plus)
+          (counsel-projectile-rg . ivy--regex-plus)
+          (swiper                . ivy--regex-plus)
+          (t                     . ivy--regex-fuzzy)))
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-initial-inputs-alist nil)
+  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
+  (define-key ivy-mode-map       (kbd "<escape>") nil)
+  (define-key ivy-minibuffer-map (kbd "<escape>") #'minibuffer-keyboard-quit))
+
+(use-package ivy-prescient
+  :after (prescient ivy counsel)
+  :config
+  (setq ivy-prescient-sort-commands
+        '(:not swiper
+               counsel-grep
+               counsel-rg
+               counsel-projectile-rg
+               ivy-switch-buffer
+               counsel-switch-buffer))
+  (setq ivy-prescient-retain-classic-highlighting t)
+  (ivy-prescient-mode +1))
+
+(ivy-mode)
+(setq enable-recursive-minibuffers t)
+;; enable this if you want `swiper' to use it
+;; (setq search-default-mode #'char-fold-to-regexp)
+(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+
+#+end_src
+**** Fancy Ivy
+
+#+begin_src emacs-lisp
+
+(use-package ivy-posframe
+  :demand t
+  :after ivy
+  :custom
+  (ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+  :config
+  (ivy-posframe-mode))
+
+
+(use-package all-the-icons-ivy-rich
+  :straight t
+  :init (all-the-icons-ivy-rich-mode 1))
+
+(use-package ivy-rich
+  :after (counsel-projectile)
+  :config
+  (ivy-rich-mode 1))
+
+#+end_src
+
+*** Counsel
+
+#+begin_src emacs-lisp
+
+(use-package counsel
+  :hook (ivy-mode . counsel-mode)
+  :config
+  (setq counsel-rg-base-command "rg --vimgrep %s")
+  (global-set-key (kbd "s-P") #'counsel-M-x)
+  (global-set-key (kbd "C-S-p") #'counsel-M-x)
+  (global-set-key (kbd "s-f") #'counsel-grep-or-swiper)
+  (global-set-key (kbd "C-s") #'counsel-grep-or-swiper))
+
+(use-package counsel-projectile
+  :config
+  (counsel-projectile-mode +1))
+
+#+end_src
+
+*** Swiper
+
+#+begin_src emacs-lisp
+
+(use-package swiper
+  :after ivy
+  :config
+  (setq swiper-action-recenter t)
+  (setq swiper-goto-start-of-match t))
+
+(setq swiper-use-visual-line nil)
+(setq swiper-use-visual-line-p (lambda (a) nil))
+#+end_src
+
+*** Projectile
+
+#+begin_src emacs-lisp
+
+(use-package projectile
+  :config
+  (setq projectile-sort-order 'recentf)
+  (setq projectile-indexing-method 'hybrid)
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-mode-line-prefix " ")
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
+  (define-key projectile-mode-map (kbd "s-p") #'projectile-find-file)
+  (define-key projectile-mode-map (kbd "C-p") #'projectile-find-file)
+  (define-key projectile-mode-map (kbd "s-F") #'projectile-ripgrep)
+  (define-key projectile-mode-map (kbd "C-S-f") #'projectile-ripgrep))
+
+#+end_src
+
+
 ** Window Management
 
 #+begin_src emacs-lisp
@@ -192,6 +319,7 @@
 
 #+end_src
 
+
 ** Which Key
 
 #+begin_src emacs-lisp
@@ -202,6 +330,7 @@
   (which-key-mode))
 
 #+end_src
+
 
 ** Company
 
@@ -214,7 +343,13 @@
   (setq company-minimum-prefix-length 3)
   (global-company-mode t))
 
+(use-package company-prescient
+  :after (prescient company)
+  :config
+  (company-prescient-mode +1))
+
 #+end_src
+
 
 ** Flycheck
 
