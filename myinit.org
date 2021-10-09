@@ -137,6 +137,12 @@
 
 (use-package dashboard
   :straight t
+  :init
+  (setq dashboard-show-shortcuts nil)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "icemacs: BWOAH")
+  (setq dashboard-startup-banner 'logo)
   :config
   (dashboard-setup-startup-hook))
 
