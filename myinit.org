@@ -43,7 +43,7 @@
 * UI Tweaks
 
 #+begin_src emacs-lisp
-
+(setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b")))
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
@@ -90,6 +90,14 @@
 (use-package doom-modeline
   :straight t
   :init (doom-modeline-mode 1))
+
+#+end_src
+
+** Font
+
+#+begin_src emacs-lisp
+
+(set-face-attribute 'default nil :font "Fira Code Retina" :height 190)
 
 #+end_src
 
@@ -255,10 +263,3 @@
   :init (doom-modeline-mode 1))
 
 #+end_src
-
-* Result
-
-#+begin_src emacs-lisp
-(emacs-uptime)
-(emacs-init-time)
-#+end_src 
