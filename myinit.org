@@ -108,6 +108,9 @@
 ;; ESCAPAYE
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
+;; Comment regions
+(global-set-key (kbd "C-/") 'comment-or-uncomment-region)
+
 ;; Wrap lines
 (global-visual-line-mode t)
 
@@ -168,11 +171,22 @@
 (use-package dashboard
   :straight t
   :init
+  (setq dashboard-set-init-info t)
   (setq dashboard-show-shortcuts nil)
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "icemacs: BWOAH")
+  (setq dashboard-banner-logo-title "Welcome to icemacs!")
   (setq dashboard-startup-banner 'logo)
+  (setq dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
+  (setq dashboard-set-navigator t)
+  (setq dashboard-navigator-buttons
+      `(;; line1
+	((,nil
+	"Bwoah"
+	"Open init file"
+	(lambda (&rest _) (find-file "~/.emacs.d/myinit.org"))
+	)))
+	)
   :config
   (dashboard-setup-startup-hook))
 
@@ -181,7 +195,7 @@
 
 ** Searching/Sorting/File Management using Vertico
 
-*** Vertico
+*** Vertico & Marginalia
 #+begin_src emacs-lisp
 (use-package vertico
   :straight t
@@ -212,8 +226,12 @@
 
 ;; Can't live without this
 (use-package orderless
-  :straight t
-  :custom (completion-styles '(orderless)))
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
+  (setq completion-styles '(orderless)
+	completion-category-defaults nil
+	completion-category-overrides '((file (styles partial-completion)))))
 
 ;; A few more useful configurations...
 (use-package emacs
