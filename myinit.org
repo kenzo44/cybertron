@@ -271,7 +271,45 @@
 
 #+end_src
 
+*** Consult
+#+begin_src emacs-lisp
 
+(defun dw/get-project-root ()
+  (when (fboundp 'projectile-project-root)
+    (projectile-project-root)))
+
+(use-package consult
+  :straight t
+  :demand t
+  :bind (("C-s" . consult-line)
+	 ("C-M-l" . consult-imenu)
+	 ("C-M-j" . persp-switch-to-buffer*)
+	 :map minibuffer-local-map
+	 ("C-r" . consult-history))
+  :custom
+  (consult-project-root-function #'dw/get-project-root)
+  (completion-in-region-function #'consult-completion-in-region))
+
+#+end_src
+
+*** Projectile
+
+#+begin_src emacs-lisp
+
+(use-package projectile
+  :config
+  (setq projectile-sort-order 'recentf)
+  (setq projectile-indexing-method 'hybrid)
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-mode-line-prefix " ")
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
+  (define-key projectile-mode-map (kbd "s-p") #'projectile-find-file)
+  (define-key projectile-mode-map (kbd "C-p") #'projectile-find-file)
+  (define-key projectile-mode-map (kbd "s-F") #'projectile-ripgrep)
+  (define-key projectile-mode-map (kbd "C-S-f") #'projectile-ripgrep))
+
+#+end_src
 
 
 ** Window Management
