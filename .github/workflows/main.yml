@@ -34,4 +34,4 @@ jobs:
     - name: Print emacs version
       run: emacs --version
     - name: Print emacs init time
-      run: emacs --batch -l init.el --eval "(message (emacs-init-time))"
+      run: emacs --batch -l ../../init.el --eval "(princ (emacs-init-time))"
