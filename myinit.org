@@ -58,7 +58,8 @@
 (setenv "BROWSER" "firefox")t
 
 (column-number-mode)
-(global-display-line-numbers-mode t)
+(when (fboundp 'global-display-line-numbers-mode)
+  (global-display-line-numbers-mode t))
 
 #+end_src
 
