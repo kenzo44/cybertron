@@ -31,6 +31,8 @@ jobs:
       with:
         version: ${{ matrix.emacs_version }}
     - uses: actions/checkout@v2
+    - name: Create symlink for .emacs.d to the current directory
+      run: ln -s "$PWD" "$HOME/.emacs.d"
     - name: Print emacs version
       run: emacs --version
     - name: Print emacs init time
