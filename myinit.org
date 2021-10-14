@@ -44,10 +44,11 @@
 
 #+begin_src emacs-lisp
 (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b")))
-(scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
-(set-fringe-mode 10) ;Breathing room
+(when window-system
+  (scroll-bar-mode -1)
+  (set-fringe-mode 10)) ;Breathing room
 (menu-bar-mode -1)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq visible-bell nil)
@@ -57,7 +58,8 @@
 (setenv "BROWSER" "firefox")t
 
 (column-number-mode)
-(global-display-line-numbers-mode t)
+(when (fboundp 'global-display-line-numbers-mode)
+  (global-display-line-numbers-mode t))
 
 #+end_src
 
