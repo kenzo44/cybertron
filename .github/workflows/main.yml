@@ -30,7 +30,7 @@ jobs:
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
-
+    - uses: actions/checkout@v2
     - name: Print emacs version
       run: emacs --version
     - name: Print emacs init time
