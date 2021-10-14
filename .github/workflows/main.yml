@@ -30,8 +30,12 @@ jobs:
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
-
+    - uses: actions/checkout@v2
     - name: Print emacs version
       run: emacs --version
-    - name: Print init time
-      run: emacs --batch --eval "(message (emacs-init-time))”
+    - name: Create symlink for .emacs.d to the current directory
+      run: ln -s "$PWD" "$HOME/.emacs.d"
+    - name: Test init file
+      run: ls -al $HOME && ls -al $HOME/.emacs.d && emacs --batch --load "init.el"
+    - name: Print emacs init time
+      run: emacs --batch --l "init.el" --eval "(princ (emacs-init-time))"
