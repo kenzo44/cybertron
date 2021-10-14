@@ -33,7 +33,5 @@ jobs:
 
     - name: Print emacs version
       run: emacs --version
-    - name: Load Init File
-      run: emacs -Q --load init.el
     - name: Print init time
       run: emacs --batch --eval "(message (emacs-init-time))”
