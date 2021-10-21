@@ -1,20 +1,13 @@
-;;; init.el --- Project Cybertron
+;;; init.el --- Icemacs
 ;; Author: Kenish
 ;;; Commentary:
 ;;; The Ultimate Emacs Setup!
 ;;; Code:
 
-(when (version< emacs-version "25.1")
-  (error "Icemacs requires Emacs 25.1 and above!"))
-
-;; Increase the gc-cons-threshold to a very high number to decrease the load time
-(eval-and-compile
-  (setq gc-cons-threshold 402653184
-        gc-cons-percentage 0.6))
-
-;; Add a hook to reset this value after initialization
-(add-hook 'icemacs-post-init-hook #'(lambda () (setq gc-cons-threshold 16777216
-                                                   gc-cons-percentage 0.1)))
+;; Custom file garbage
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 ;; Org hook
 ;; Don't attempt to find/apply special file handlers to files loaded during startup.

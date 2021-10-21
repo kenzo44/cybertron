@@ -120,13 +120,14 @@
 	((,nil
 	"Bwoah"
 	"It's lights out and away we go!"
-	(lambda (&rest _) (find-file "~/.emacs.d/myinit.org"))
+	(lambda (&rest _) (find-file "~/.emacs.d/bwoah.org"))
 	)))
 	)
   :config
   (dashboard-setup-startup-hook))
 
 #+end_src
+
 ** Searching/Sorting/File Management using Vertico
 
 *** Vertico & Marginalia
