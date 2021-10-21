@@ -1,0 +1,236 @@
+#+TITLE: Icemacs Configuration
+
+* Package Management
+
+#+begin_src emacs-lisp
+
+(unless (featurep 'straight)
+  ;; Bootstrap straight.el
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+	 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+	  (url-retrieve-synchronously
+	   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	   'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage)))
+
+;; Use straight.el for use-package expressions
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+
+#+end_src
+
+* Theme
+
+#+begin_src emacs-lisp
+(set-frame-parameter (selected-frame) 'alpha '(97 . 97))
+(add-to-list 'default-frame-alist '(alpha . (97 . 97)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+(use-package doom-themes
+  :straight t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-moonlight t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1))
+
+#+end_src
+
+** Font
+
+#+begin_src emacs-lisp
+
+(set-face-attribute 'default nil :font "Fira Code Retina" :height 190)
+
+#+end_src
+
+* Quality of Life
+
+#+begin_src emacs-lisp
+
+(use-package emacs
+  :preface
+  (defvar kenzo/indent-width 4) ; change this value to your preferred width
+  :config
+  (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b"))
+        ring-bell-function 'ignore
+        frame-resize-pixelwise t
+        default-directory "~/")
+
+  ;; Always use spaces for indentation
+  (setq-default indent-tabs-mode nil
+                tab-width kenzo/indent-width)
+
+  ;; Omit default startup screen
+  (setq inhibit-startup-screen t))
+
+;; ESCAPAYE
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; Comment regions
+(global-set-key (kbd "C-/") 'comment-or-uncomment-region)
+
+;; Wrap lines
+(global-visual-line-mode t)
+
+;; Overwrite when pasting
+(delete-selection-mode 1)
+
+#+end_src
+
+* Packages
+** Dashboard
+
+#+begin_src emacs-lisp
+
+(use-package dashboard
+  :straight t
+  :init
+  (setq dashboard-set-init-info t)
+  (setq dashboard-show-shortcuts nil)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "Welcome to icemacs!")
+  (setq dashboard-startup-banner "~/.emacs.d/assets/iceman.png")
+  (setq dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
+  (setq dashboard-set-navigator t)
+  (setq dashboard-navigator-buttons
+      `(;; line1
+	((,nil
+	"Bwoah"
+	"It's lights out and away we go!"
+	(lambda (&rest _) (find-file "~/.emacs.d/myinit.org"))
+	)))
+	)
+  :config
+  (dashboard-setup-startup-hook))
+
+#+end_src
+** Searching/Sorting/File Management using Vertico
+
+*** Vertico & Marginalia
+#+begin_src emacs-lisp
+(use-package vertico
+  :straight t
+  :bind (:map vertico-map
+	 ("C-j" . vertico-next)
+	 ("C-k" . vertico-previous)
+	 ("C-f" . vertico-exit)
+	 :map minibuffer-local-map
+	 ("M-h" . backward-kill-word))
+  :custom
+  (vertico-cycle t)
+  :init
+  (vertico-mode))
+
+;; Saves search history for counsel
+(use-package savehist
+  :init
+  (savehist-mode))
+
+;; Describes each smex function
+(use-package marginalia
+  :after vertico
+  :straight t
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
+
+;; Can't live without this
+(use-package orderless
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
+  (setq completion-styles '(orderless)
+	completion-category-defaults nil
+	completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
+
+*** Embark
+
+#+begin_src emacs-lisp
+
+;; In short enables a right click
+(use-package embark
+  :straight t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		 nil
+		 (window-parameters (mode-line-format . none)))))
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :straight t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+#+end_src
+
+*** Consult
+#+begin_src emacs-lisp
+
+(defun dw/get-project-root ()
+  (when (fboundp 'projectile-project-root)
+    (projectile-project-root)))
+
+(use-package consult
+  :straight t
+  :demand t
+  :bind (("C-s" . consult-line)
+	 ("C-M-l" . consult-imenu)
+	 ("C-M-j" . persp-switch-to-buffer*)
+	 :map minibuffer-local-map
+	 ("C-r" . consult-history))
+  :custom
+  (consult-project-root-function #'dw/get-project-root)
+  (completion-in-region-function #'consult-completion-in-region))
+
+#+end_src
+** Treemacs
+
+#+begin_src emacs-lisp
+
+(use-package treemacs
+  :commands treemacs
+  :bind
+  (:map global-map
+        ([f5] . treemacs)
+        ("C-<f5>" . treemacs-select-window))
+  :config
+  (setq treemacs-is-never-other-window t))
+
+#+end_src
