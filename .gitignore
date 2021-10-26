@@ -1,14 +1,16 @@
-elpa
-projectile-bookmarks.eld
-auto-save-list
-bwoah.el
-straight
-recentf
-
 #compiled files
 *.elc
 *.lib
 *.fas
 *.dat
 *.eld
+
+*~
+elpa
+projectile-bookmarks.eld
+auto-save-list
+bwoah.el
+straight
+recentf
 .cache
+history
