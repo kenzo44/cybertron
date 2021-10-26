@@ -1,5 +1,0 @@
-(require 'org)
-(org-babel-tangle-file "bwoah.org")
-(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
-(byte-compile-file "bwoah.el")
-(byte-compile-file "init.el")
