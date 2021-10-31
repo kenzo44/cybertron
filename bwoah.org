@@ -25,7 +25,7 @@
 
 #+end_src
 
-* Emacs Tweaks
+* Emacs Tweaks/Quality of Life
 
 #+begin_src emacs-lisp
   (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b")))
@@ -38,6 +38,18 @@
   (when (fboundp 'global-display-line-numbers-mode)
     (global-display-line-numbers-mode t))
 
+  ;; ESCAPAYE
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+  ;; Comment regions
+  (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
+
+  ;; Wrap lines
+  (global-visual-line-mode t)
+
+  ;; Overwrite when pasting
+  (delete-selection-mode 1)
+
 #+end_src
 
 * Theme
@@ -48,23 +60,24 @@
   (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
+  (use-package all-the-icons)
   (use-package doom-themes
-     :straight t
-     :config
-     ;; Global settings (defaults)
-     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-     (load-theme 'doom-moonlight t)
+    :straight t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-moonlight t)
 
-     ;; Enable flashing mode-line on errors
-     (doom-themes-visual-bell-config)
-     ;; Enable custom neotree theme (all-the-icons must be installed!)
-     (doom-themes-neotree-config)
-     ;; or for treemacs users
-     (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-     (doom-themes-treemacs-config)
-     ;; Corrects (and improves) org-mode's native fontification.
-     (doom-themes-org-config))
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    (doom-themes-neotree-config)
+    ;; or for treemacs users
+    (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    (doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
 
   (use-package doom-modeline
     :straight t
@@ -85,40 +98,6 @@
 
 #+end_src
 
-* Quality of Life
-
-#+begin_src emacs-lisp
-
-  (use-package emacs
-    :preface
-    (defvar kenzo/indent-width 4) ; change this value to your preferred width
-    :config
-    (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b"))
-          ring-bell-function 'ignore
-          frame-resize-pixelwise t
-          default-directory "~/")
-
-    ;; Always use spaces for indentation
-    (setq-default indent-tabs-mode nil
-                  tab-width kenzo/indent-width)
-
-    ;; Omit default startup screen
-    (setq inhibit-startup-screen t))
-
-  ;; ESCAPAYE
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-  ;; Comment regions
-  (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
-
-  ;; Wrap lines
-  (global-visual-line-mode t)
-
-  ;; Overwrite when pasting
-  (delete-selection-mode 1)
-
-#+end_src
-
 * Packages
 ** Dashboard
 
@@ -136,7 +115,7 @@
     (setq dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
     (setq dashboard-set-navigator t)
     (setq dashboard-navigator-buttons
-        `(;; line1
+	`(;; line1
       ((,nil
       "Bwoah"
       "It's lights out and away we go!"
@@ -155,11 +134,11 @@
   (use-package vertico
     :straight t
     :bind (:map vertico-map
-       ("C-j" . vertico-next)
-       ("C-k" . vertico-previous)
-       ("C-f" . vertico-exit)
-       :map minibuffer-local-map
-       ("M-h" . backward-kill-word))
+		("C-j" . vertico-next)
+		("C-k" . vertico-previous)
+		("C-f" . vertico-exit)
+		:map minibuffer-local-map
+		("M-h" . backward-kill-word))
     :custom
     (vertico-cycle t)
     :init
@@ -179,14 +158,17 @@
     :init
     (marginalia-mode))
 
+  (setq completion-ignore-case t)
+  (setq read-file-name-completion-ignore-case t)
+
   ;; Can't live without this
   (use-package orderless
     :init
     ;; Configure a custom style dispatcher (see the Consult wiki)
     ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
     (setq completion-styles '(orderless)
-      completion-category-defaults nil
-      completion-category-overrides '((file (styles partial-completion)))))
+	  completion-category-defaults nil
+	  completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 
 *** Embark
@@ -206,9 +188,9 @@
     :config
     ;; Hide the mode line of the Embark live/completions buffers
     (add-to-list 'display-buffer-alist
-             '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-               nil
-           (window-parameters (mode-line-format . none)))))
+	     '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+	       nil
+	   (window-parameters (mode-line-format . none)))))
   ;; Consult users will also want the embark-consult package.
   (use-package embark-consult
     :straight t
@@ -233,6 +215,7 @@
     :demand t
     :bind (("C-s" . consult-line)
        ("C-M-l" . consult-imenu)
+       ("C-x b" . consult-buffer)
        ("C-M-j" . persp-switch-to-buffer*)
        :map minibuffer-local-map
        ("C-r" . consult-history))
@@ -257,8 +240,7 @@
 
 #+end_src
 
-* Autocompletion
-
+** Autocompletion
 ** Company
    
 #+begin_src emacs-lisp
@@ -360,3 +342,42 @@
         :custom (company-quickhelp-delay 0.8)))
 
 #+end_src
+
+** Which-key
+
+#+begin_src emacs-lisp
+
+  (use-package which-key
+    :straight (:build t)
+    :defer t
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 0.4
+        which-key-idle-secondary-delay 0.4))
+
+#+end_src
+
+* Evil
+
+#+begin_src emacs-lisp
+
+  (use-package evil
+    :straight (:build t)
+    :init
+    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+
+  (use-package evil-collection
+    :after evil
+    :straight (:build t)
+    :config
+    (evil-collection-init))
+
+#+end_src
+
+
+
+ 
