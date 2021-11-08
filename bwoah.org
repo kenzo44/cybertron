@@ -343,7 +343,34 @@
 
 #+end_src
 
-** Which-key
+** Yasnippet
+
+#+begin_src emacs-lisp
+  (use-package yasnippet
+	:defer t
+	:straight (:build t)
+	:init
+	(yas-global-mode)
+	:hook ((prog-mode . yas-minor-mode)
+	       (text-mode . yas-minor-mode)))
+
+   (use-package yasnippet-snippets
+      :defer t
+      :after yasnippet
+      :straight (:build t))
+
+(use-package yatemplate
+  :defer t
+  :after yasnippet
+  :straight (:build t))
+
+(use-package consult-yasnippet
+  :defer t
+  :after yasnippet
+  :straight (:build t))
+#+end_src
+
+* Which-key
 
 #+begin_src emacs-lisp
 
