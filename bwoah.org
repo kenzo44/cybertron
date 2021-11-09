@@ -1,9 +1,8 @@
 #+TITLE: Icemacs Configuration
 
 * Package Management
-  
-#+begin_src emacs-lisp
 
+#+begin_src emacs-lisp
   (unless (featurep 'straight)
     ;; Bootstrap straight.el
     (defvar bootstrap-version)
@@ -22,18 +21,19 @@
   ;; Use straight.el for use-package expressions
   (straight-use-package 'use-package)
   (setq straight-use-package-by-default t)
-
 #+end_src
 
-* Emacs Tweaks/Quality of Life
+* Quality of Life
+
+** Emacs
 
 #+begin_src emacs-lisp
   (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b")))
   (fset 'yes-or-no-p 'y-or-n-p)
   (setq visible-bell nil)
   (display-time-mode t)
-  (setenv "BROWSER" "firefox")t
 
+  ;; Line numbers
   (column-number-mode)
   (when (fboundp 'global-display-line-numbers-mode)
     (global-display-line-numbers-mode t))
@@ -44,29 +44,65 @@
   ;; Comment regions
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
 
+  ;; Better way to manage backups
+  (setq backup-directory-alist `(("." . ,(expand-file-name ".tmp/backups/" user-emacs-directory))))
+
+  ;; Delete means delete
+  (setq delete-by-moving-to-trash t)
+#+end_src
+
+** Text Editing
+
+#+begin_src emacs-lisp
+  ;; Remove bloated space
+  (add-hook 'before-save-hook #'whitespace-cleanup)
+  (setq-default sentence-end-double-space nil)
+
+  ;; Iterate through camelCase
+  (global-subword-mode 1)
+
   ;; Wrap lines
   (global-visual-line-mode t)
 
   ;; Overwrite when pasting
-  (delete-selection-mode 1)
+  (delete-selection-mode t)
 
+  ;; Cursor covers the entire letter
+  (setq x-stretch-cursor t)
+
+  (setq-default indent-tabs-mode nil)
+  (add-hook 'prog-mode-hook (lambda () (setq indent-tabs-mode nil)))
+#+end_src
+
+** Helper Functions
+
+*** Open Sudo File
+#+begin_src emacs-lisp
+(defun sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "FSudo Find File: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
 #+end_src
 
 * Theme
 
 #+begin_src emacs-lisp
+
   (set-frame-parameter (selected-frame) 'alpha '(97 . 97))
   (add-to-list 'default-frame-alist '(alpha . (97 . 97)))
   (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
-  (use-package all-the-icons)
+  (use-package all-the-icons
+    :defer t
+    :straight t)
   (use-package doom-themes
     :straight t
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
     (load-theme 'doom-moonlight t)
 
     ;; Enable flashing mode-line on errors
@@ -99,6 +135,7 @@
 #+end_src
 
 * Packages
+
 ** Dashboard
 
 #+begin_src emacs-lisp
@@ -115,7 +152,7 @@
     (setq dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
     (setq dashboard-set-navigator t)
     (setq dashboard-navigator-buttons
-	`(;; line1
+        `(;; line1
       ((,nil
       "Bwoah"
       "It's lights out and away we go!"
@@ -127,6 +164,42 @@
 
 #+end_src
 
+** Window Management
+
+#+begin_src emacs-lisp
+
+(use-package "window"
+  :straight nil
+  :preface
+  (defun kenzo/split-and-follow-horizontally ()
+    "Split window below."
+    (interactive)
+    (split-window-below)
+    (other-window 1))
+  (defun kenzo/split-and-follow-vertically ()
+    "Split window right."
+    (interactive)
+    (split-window-right)
+    (other-window 1))
+  :config
+  (setq split-width-threshold 100)
+  (global-set-key (kbd "C-x 2") #'kenzo/split-and-follow-horizontally)
+  (global-set-key (kbd "C-x 3") #'kenzo/split-and-follow-vertically))
+
+(use-package switch-window
+  :straight t
+  :config
+    (setq switch-window-input-style 'minibuffer)
+    (setq switch-window-increase 4)
+    (setq switch-window-threshold 2)
+    (setq switch-window-shortcut-style 'qwerty)
+    (setq switch-window-qwerty-shortcuts
+        '("a" "s" "d" "f" "j" "k" "l" "i" "o"))
+  :bind
+    ([remap other-window] . switch-window))
+
+#+end_src
+
 ** Searching/Sorting/File Management using Vertico
 
 *** Vertico & Marginalia
@@ -134,11 +207,11 @@
   (use-package vertico
     :straight t
     :bind (:map vertico-map
-		("C-j" . vertico-next)
-		("C-k" . vertico-previous)
-		("C-f" . vertico-exit)
-		:map minibuffer-local-map
-		("M-h" . backward-kill-word))
+                ("C-j" . vertico-next)
+                ("C-k" . vertico-previous)
+                ("C-f" . vertico-exit)
+                :map minibuffer-local-map
+                ("M-h" . backward-kill-word))
     :custom
     (vertico-cycle t)
     :init
@@ -167,8 +240,8 @@
     ;; Configure a custom style dispatcher (see the Consult wiki)
     ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
     (setq completion-styles '(orderless)
-	  completion-category-defaults nil
-	  completion-category-overrides '((file (styles partial-completion)))))
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 
 *** Embark
@@ -188,9 +261,9 @@
     :config
     ;; Hide the mode line of the Embark live/completions buffers
     (add-to-list 'display-buffer-alist
-	     '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-	       nil
-	   (window-parameters (mode-line-format . none)))))
+             '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+               nil
+           (window-parameters (mode-line-format . none)))))
   ;; Consult users will also want the embark-consult package.
   (use-package embark-consult
     :straight t
@@ -216,6 +289,7 @@
     :bind (("C-s" . consult-line)
        ("C-M-l" . consult-imenu)
        ("C-x b" . consult-buffer)
+       ("C-x y" . consult-yasnippet)
        ("C-M-j" . persp-switch-to-buffer*)
        :map minibuffer-local-map
        ("C-r" . consult-history))
@@ -241,8 +315,8 @@
 #+end_src
 
 ** Autocompletion
-** Company
-   
+*** Company
+
 #+begin_src emacs-lisp
 
   (use-package company
@@ -347,12 +421,12 @@
 
 #+begin_src emacs-lisp
   (use-package yasnippet
-	:defer t
-	:straight (:build t)
-	:init
-	(yas-global-mode)
-	:hook ((prog-mode . yas-minor-mode)
-	       (text-mode . yas-minor-mode)))
+        :defer t
+        :straight (:build t)
+        :init
+        (yas-global-mode)
+        :hook ((prog-mode . yas-minor-mode)
+               (text-mode . yas-minor-mode)))
 
    (use-package yasnippet-snippets
       :defer t
@@ -370,7 +444,7 @@
   :straight (:build t))
 #+end_src
 
-* Which-key
+** Which-key
 
 #+begin_src emacs-lisp
 
@@ -385,7 +459,56 @@
 
 #+end_src
 
-* Evil
+** Flycheck
+
+#+begin_src emacs-lisp
+(use-package flycheck
+  :straight (:build t)
+  :defer t
+  :init
+  (global-flycheck-mode)
+  :config
+  (setq flycheck-emacs-lisp-load-path 'inherit)
+
+  ;; Rerunning checks on every newline is a mote excessive.
+  (delq 'new-line flycheck-check-syntax-automatically)
+  ;; And don’t recheck on idle as often
+  (setq flycheck-idle-change-delay 2.0)
+
+  ;; For the above functionality, check syntax in a buffer that you
+  ;; switched to on briefly. This allows “refreshing” the syntax check
+  ;; state for several buffers quickly after e.g. changing a config
+  ;; file.
+  (setq flycheck-buffer-switch-check-intermediate-buffers t)
+
+  ;; Display errors a little quicker (default is 0.9s)
+  (setq flycheck-display-errors-delay 0.2))
+
+(use-package flycheck-posframe
+  :straight (:build t)
+  :hook (flycheck-mode . flycheck-posframe-mode)
+  :config
+  (setq flycheck-posframe-warning-prefix "! "
+        flycheck-posframe-info-prefix    "··· "
+        flycheck-posframe-error-prefix   "X "))
+
+#+end_src
+
+* Keybindings
+
+** General
+
+#+begin_src emacs-lisp
+
+  (use-package general
+  :defer t
+  :straight (:build t)
+  :init
+  (general-auto-unbind-keys))
+
+#+end_src
+
+** Evil
 
 #+begin_src emacs-lisp
 
@@ -404,7 +527,3 @@
     (evil-collection-init))
 
 #+end_src
-
-
-
- 
