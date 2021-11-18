@@ -4,9 +4,9 @@
 
 #+begin_src emacs-lisp
   (unless (featurep 'straight)
-  (setq straight-disable-native-compile t)
     ;; Bootstrap straight.el
     (defvar bootstrap-version)
+    (defvar comp-deferred-compilation-deny-list ()) ; workaround, otherwise straight shits itself
     (let ((bootstrap-file
            (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
           (bootstrap-version 5))
