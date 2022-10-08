@@ -131,7 +131,7 @@
 
 #+begin_src emacs-lisp
 
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height 190)
+  (set-face-attribute 'default nil :font "Fira Code Retina" :height 160)
 
 #+end_src
 
