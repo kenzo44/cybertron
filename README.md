@@ -2,7 +2,14 @@
 <p align="center">
 <a href="https://github.com/kenzo44/icemacs"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
 
-I love Emacs...I've been hacking away at it since 2012. This is my ultimate configuration. It's not perfect...
+I love Emacs...I've been hacking away at it since 2012. This is my ultimate configuration.
+
+# :car: Roadmap
+
+> Transitioning over to a module structure instead of using org mode i.e. inspired/similar to doom and crafted
+> A dynamic configuration that works on all devices
+> A configuration that works for all developers
+> No bloat
 
 ## Prerequisites
 
@@ -12,7 +19,7 @@ I use [emacs-plus](https://github.com/d12frosted/homebrew-emacs-plus) cause it h
 
 ### Font
 
-After years of tinkering around, [FiraCode](https://github.com/tonsky/FiraCode) is brilliant
+After years of searching, [FiraCode](https://github.com/tonsky/FiraCode) is perfect!
 
 ## Installation
 
