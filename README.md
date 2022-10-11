@@ -2,16 +2,16 @@
 <p align="center">
 <a href="https://github.com/kenzo44/icemacs"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
 
-I love Emacs...I've been hacking away at it since 2012. This is my ultimate configuration.
+I love Emacs...I've been hacking away at it since 2012. It has changed over the years from a single init file > multiple files > .spacemacs > doom > bwoah.org. This is my ultimate configuration!
 
-# :car: Roadmap
+## :car: Roadmap
 
-> Transitioning over to a module structure instead of using org mode i.e. inspired/similar to doom and crafted
-> A dynamic configuration that works on all devices
-> A configuration that works for all developers
-> No bloat
+* Transitioning over to a module structure instead of using org mode i.e. inspired/similar to doom and crafted
+* A dynamic configuration that works on all devices
+* A configuration that works for all developers
+* No bloat
 
-## Prerequisites
+## :hamburger: Prerequisites
 
 ### Emacs
 
@@ -21,7 +21,7 @@ I use [emacs-plus](https://github.com/d12frosted/homebrew-emacs-plus) cause it h
 
 After years of searching, [FiraCode](https://github.com/tonsky/FiraCode) is perfect!
 
-## Installation
+## :sunglasses: Installation
 
 Back up your existing configuration `~/.emacs.d/` first (if you have one):
 
