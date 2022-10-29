@@ -37,7 +37,7 @@
                '(width . 85)
                )))
 
-(add-to-list 'default-frame-alist '(undecorated . t))
+;;(add-to-list 'default-frame-alist '(undecorated . t))
 ;; echo buffer
 ;; Don't display any message
 ;; https://emacs.stackexchange.com/a/437/11934
