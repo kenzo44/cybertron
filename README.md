@@ -1,3 +1,4 @@
+<h1>icemacs does not support v29.</h1>
 <h1 align="center">:ice_cube: icemacs</h1>
 <p align="center">
 <a href="https://github.com/kenzo44/icemacs"><img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
