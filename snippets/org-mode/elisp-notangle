@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: elisp-notangle
-# key: elisp-notangle
-# --
-#+begin_src emacs-lisp
-
-#+end_src

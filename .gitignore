@@ -1,3 +1,5 @@
+.DS_Store
+
 #compiled files
 *.elc
 *.lib
@@ -14,3 +16,6 @@ straight
 recentf
 .cache
 history
+eln-cache
+var
+init.el
