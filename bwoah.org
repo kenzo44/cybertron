@@ -1,109 +1,65 @@
 #+TITLE: Icemacs Configuration
+#+Author: Kenzo44
+#+Description: My icemacs configuration!
+#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+Startup: showeverything
+#+Options: toc:2
+
+#+begin_src emacs-lisp
+;;; init.el --- Kenzo's Emacs setup.  -*- lexical-binding: t; -*-
+(setq before-init-time (current-time))
+#+end_src
+
+* Auto-tangle Configuration file
+
+#+begin_src emacs-lisp
+  (defun my/auto-tangle-emacs-config ()
+      "Auto-tangle Emacs configuration upon saving."
+      (when (equal (file-name-directory (buffer-file-name))
+		   (expand-file-name user-emacs-directory))
+	(let ((org-confirm-babel-evaluate nil))
+	  (org-babel-tangle))))
+
+    (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/auto-tangle-emacs-config nil 'make-it-local)))
+#+end_src
+
 
 * Package Management
 
 #+begin_src emacs-lisp
-  (unless (featurep 'straight)
-    ;; Bootstrap straight.el
-    (defvar bootstrap-version)
-    (defvar comp-deferred-compilation-deny-list ()) ; workaround, otherwise straight shits itself
-    (let ((bootstrap-file
-           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-          (bootstrap-version 5))
-      (unless (file-exists-p bootstrap-file)
-        (with-current-buffer
-            (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-      (load bootstrap-file nil 'nomessage)))
+  (eval-when-compile
+    (require 'use-package))
 
-  ;; Use straight.el for use-package expressions
-  (straight-use-package 'use-package)
-  (setq straight-use-package-by-default t)
+  (require 'package)
+  (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+  (add-to-list 'load-path "~/.emacs.d/lisp")
+
+  (package-initialize)
+
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (eval-and-compile
+    (setq use-package-always-ensure t
+	  use-package-expand-minimally t))
 #+end_src
 
-* Quality of Life
-
-** Emacs
-
-#+begin_src emacs-lisp
-  (setq frame-title-format '(buffer-file-name "Autobots, roll out! - %f" ("%b")))
-  (fset 'yes-or-no-p 'y-or-n-p)
-  (setq visible-bell nil)
-  (display-time-mode t)
-
-  ;; Line numbers
-  (column-number-mode)
-  (when (fboundp 'global-display-line-numbers-mode)
-    (global-display-line-numbers-mode t))
-
-  ;; ESCAPAYE
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
-  ;; Comment regions
-  (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
-
-  ;; Better way to manage backups
-  (setq backup-directory-alist `(("." . ,(expand-file-name ".tmp/backups/" user-emacs-directory))))
-
-  ;; Delete means delete
-  (setq delete-by-moving-to-trash t)
-#+end_src
-
-** Text Editing
-
-#+begin_src emacs-lisp
-  ;; Remove bloated space
-  (add-hook 'before-save-hook #'whitespace-cleanup)
-  (setq-default sentence-end-double-space nil)
-
-  ;; Iterate through camelCase
-  (global-subword-mode 1)
-
-  ;; Wrap lines
-  (global-visual-line-mode t)
-
-  ;; Overwrite when pasting
-  (delete-selection-mode t)
-
-  ;; Cursor covers the entire letter
-  (setq x-stretch-cursor t)
-
-  (setq-default indent-tabs-mode nil)
-  (add-hook 'prog-mode-hook (lambda () (setq indent-tabs-mode nil)))
-#+end_src
-
-** Helper Functions
-
-*** Open Sudo File
-#+begin_src emacs-lisp
-(defun sudo-find-file (file-name)
-  "Like find file, but opens the file as root."
-  (interactive "FSudo Find File: ")
-  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
-    (find-file tramp-file-name)))
-#+end_src
 
 * Theme
 
+** Doom
+
 #+begin_src emacs-lisp
+  (set-face-attribute 'default nil :font "Fira Code Retina" :height 135)
 
-  (set-frame-parameter (selected-frame) 'alpha '(97 . 97))
-  (add-to-list 'default-frame-alist '(alpha . (97 . 97)))
-  (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-  (use-package all-the-icons
-    :defer t
-    :straight t)
   (use-package doom-themes
-    :straight t
+    :ensure t
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
     (load-theme 'doom-moonlight t)
 
     ;; Enable flashing mode-line on errors
@@ -117,32 +73,118 @@
     (doom-themes-org-config))
 
   (use-package doom-modeline
-    :straight t
-    :init (doom-modeline-mode 1))
+    :init (doom-modeline-mode 1)
+    :custom
+    (doom-modeline-height 30)     ;; Sets modeline height
+    (doom-modeline-bar-width 5)   ;; Sets right bar width
+    (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+    (setq doom-modeline-icon t)
+    (doom-modeline-persp-icon t)) ;; Adds folder icon next to persp name
 
   (use-package nyan-mode
-    :straight t
+    :ensure t
     :config
-    (setq nyan-wavy-trail 1)
+    (setq nyan-wavy-trail t)
     (nyan-mode))
 #+end_src
 
-** Font
+** Nerd Icons
 
 #+begin_src emacs-lisp
+  (use-package nerd-icons
+    :if (display-graphic-p))
 
-  (set-face-attribute 'default nil :font "Fira Code Retina" :height 160)
+  (use-package nerd-icons-dired
+    :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
 
+  (use-package nerd-icons-ibuffer
+    :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+#+end_src
+
+
+* Better Defaults
+
+#+begin_src emacs-lisp
+;; Add unique buffer names in the minibuffer where there are many
+;; identical files. This is super useful if you rely on folders for
+;; organization and have lots of files with the same name,
+;; e.g. foo/index.ts and bar/index.ts.
+(require 'uniquify)
+
+;; Automatically insert closing parens
+(electric-pair-mode t)
+
+;; Efficiency Changes
+(setq auto-revert-avoid-polling t
+      auto-revert-check-vc-info t
+      global-auto-revert-non-file-buffers t)
+
+;; Enable global-auto-revert-mode
+(global-auto-revert-mode t)
+#+end_src
+
+
+* File Management
+
+** Custom File Management
+
+#+begin_src emacs-lisp
+  (setq-default custom-file (expand-file-name "var/custom.el" user-emacs-directory))
+  (when (file-exists-p custom-file) ; Don’t forget to load it, we still need it
+    (load custom-file))
+#+end_src
+
+** Efficient Backup System
+
+#+begin_src emacs-lisp
+  (setq version-control t     ;; Use version numbers for backups.
+	kept-new-versions 10  ;; Number of newest versions to keep.
+	kept-old-versions 0   ;; Number of oldest versions to keep.
+	delete-old-versions t ;; Don't ask to delete excess backup versions.
+	backup-by-copying t)  ;; Copy all files, don't rename them.
+  (setq vc-make-backup-files t)
+
+  ;; Default and per-save backups go here:
+  (setq backup-directory-alist '(("" . "~/.emacs.d/backup/per-save")))
+
+  (defun force-backup-of-buffer ()
+    ;; Make a special "per session" backup at the first save of each
+    ;; emacs session.
+    (when (not buffer-backed-up)
+      ;; Override the default parameters for per-session backups.
+      (let ((backup-directory-alist '(("" . "~/.emacs.d/backup/per-session")))
+	    (kept-new-versions 3))
+	(backup-buffer)))
+    ;; Make a "per save" backup on each save.  The first save results in
+    ;; both a per-session and a per-save backup, to keep the numbering
+    ;; of per-save backups consistent.
+    (let ((buffer-backed-up nil))
+      (backup-buffer)))
+
+  (add-hook 'before-save-hook  'force-backup-of-buffer) 
+#+end_src
+
+** No litter
+
+#+begin_src emacs-lisp
+  (use-package no-littering
+    :ensure t
+    :demand t)  
 #+end_src
 
 * Packages
 
+** Diminish
+
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+
 ** Dashboard
 
 #+begin_src emacs-lisp
-
   (use-package dashboard
-    :straight t
+    :ensure t
     :init
     (setq dashboard-set-init-info t)
     (setq dashboard-show-shortcuts nil)
@@ -153,378 +195,55 @@
     (setq dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
     (setq dashboard-set-navigator t)
     (setq dashboard-navigator-buttons
-        `(;; line1
-      ((,nil
-      "Bwoah"
-      "It's lights out and away we go!"
-      (lambda (&rest _) (find-file "~/.emacs.d/bwoah.org"))
-      )))
-      )
+	  `(;; line1
+	    ((,nil
+	      "Bwoah"
+	      "It's lights out and away we go!"
+	      (lambda (&rest _) (find-file "~/.emacs.d/bwoah.org"))
+	      )))
+	  )
     :config
     (dashboard-setup-startup-hook))
-
 #+end_src
 
-** Window Management
+** Which Key
 
 #+begin_src emacs-lisp
-
-(use-package "window"
-  :straight nil
-  :preface
-  (defun kenzo/split-and-follow-horizontally ()
-    "Split window below."
-    (interactive)
-    (split-window-below)
-    (other-window 1))
-  (defun kenzo/split-and-follow-vertically ()
-    "Split window right."
-    (interactive)
-    (split-window-right)
-    (other-window 1))
-  :config
-  (setq split-width-threshold 100)
-  (global-set-key (kbd "C-x 2") #'kenzo/split-and-follow-horizontally)
-  (global-set-key (kbd "C-x 3") #'kenzo/split-and-follow-vertically))
-
-(use-package switch-window
-  :straight t
-  :config
-    (setq switch-window-input-style 'minibuffer)
-    (setq switch-window-increase 4)
-    (setq switch-window-threshold 2)
-    (setq switch-window-shortcut-style 'qwerty)
-    (setq switch-window-qwerty-shortcuts
-        '("a" "s" "d" "f" "j" "k" "l" "i" "o"))
-  :bind
-    ([remap other-window] . switch-window))
-
-#+end_src
-
-** Searching/Sorting/File Management using Vertico
-
-*** Vertico & Marginalia
-#+begin_src emacs-lisp
-  (use-package vertico
-    :straight t
-    :bind (:map vertico-map
-                ("C-j" . vertico-next)
-                ("C-k" . vertico-previous)
-                ("C-f" . vertico-exit)
-                :map minibuffer-local-map
-                ("M-h" . backward-kill-word))
-    :custom
-    (vertico-cycle t)
-    :init
-    (vertico-mode))
-
-  ;; Saves search history for counsel
-  (use-package savehist
-    :init
-    (savehist-mode))
-
-  ;; Describes each smex function
-  (use-package marginalia
-    :after vertico
-    :straight t
-    :custom
-    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-    :init
-    (marginalia-mode))
-
-  (setq completion-ignore-case t)
-  (setq read-file-name-completion-ignore-case t)
-
-  ;; Can't live without this
-  (use-package orderless
-    :init
-    ;; Configure a custom style dispatcher (see the Consult wiki)
-    ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
-    (setq completion-styles '(orderless)
-          completion-category-defaults nil
-          completion-category-overrides '((file (styles partial-completion)))))
-#+end_src
-
-*** Embark
-
-#+begin_src emacs-lisp
-
-  ;; In short enables a right click
-  (use-package embark
-    :straight t
-    :bind
-    (("C-." . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-    :init
-    ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
-    :config
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-             '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-               nil
-           (window-parameters (mode-line-format . none)))))
-  ;; Consult users will also want the embark-consult package.
-  (use-package embark-consult
-    :straight t
-    :after (embark consult)
-    :demand t ; only necessary if you have the hook below
-    ;; if you want to have consult previews as you move around an
-    ;; auto-updating embark collect buffer
-    :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
-
-#+end_src
-
-*** Consult
-#+begin_src emacs-lisp
-
-  (defun dw/get-project-root ()
-    (when (fboundp 'projectile-project-root)
-      (projectile-project-root)))
-
-  (use-package consult
-    :straight t
-    :demand t
-    :bind (("C-s" . consult-line)
-       ("C-M-l" . consult-imenu)
-       ("C-x b" . consult-buffer)
-       ("C-x y" . consult-yasnippet)
-       ("C-M-j" . persp-switch-to-buffer*)
-       :map minibuffer-local-map
-       ("C-r" . consult-history))
-    :custom
-    (consult-project-root-function #'dw/get-project-root)
-    (completion-in-region-function #'consult-completion-in-region))
-
-#+end_src
-
-** Treemacs
-
-#+begin_src emacs-lisp
-
-  (use-package treemacs
-    :commands treemacs
-    :bind
-    (:map global-map
-          ([f5] . treemacs)
-          ("C-<f5>" . treemacs-select-window))
-    :config
-    (setq treemacs-is-never-other-window t))
-
-#+end_src
-
-** Autocompletion
-*** Company
-
-#+begin_src emacs-lisp
-
-  (use-package company
-    :diminish company-mode
-    :defines
-    (company-dabbrev-ignore-case company-dabbrev-downcase)
-    :bind
-    (:map company-active-map
-          ("C-n" . company-select-next)
-          ("C-p" . company-select-previous)
-          ("<tab>" . company-complete-common-or-cycle)
-          :map company-search-map
-          ("C-p" . company-select-previous)
-          ("C-n" . company-select-next))
-    :custom
-    (company-idle-delay 0)
-    (company-echo-delay 0)
-    (company-minimum-prefix-length 1)
-    :hook
-    (after-init . global-company-mode)
-    (plantuml-mode . (lambda () (set (make-local-variable 'company-backends)
-                                     '((company-yasnippet
-                                        ;; company-dabbrev
-                                        )))))
-    ((go-mode
-      c++-mode
-      c-mode
-      objc-mode) . (lambda () (set (make-local-variable 'company-backends)
-                                   '((company-yasnippet
-                                 company-lsp
-                                 company-files
-                                 ;; company-dabbrev-code
-                                 )))))
-    :config
-    ;; using child frame
-    (use-package company-posframe
-      :hook (company-mode . company-posframe-mode))
-    ;; Show pretty icons
-    (use-package company-box
-      :diminish
-      :hook (company-mode . company-box-mode)
-      :init (setq company-box-icons-alist 'company-box-icons-all-the-icons)
-      :config
-      (setq company-box-backends-colors nil)
-      (setq company-box-show-single-candidate t)
-      (setq company-box-max-candidates 50)
-
-      (defun company-box-icons--elisp (candidate)
-        (when (derived-mode-p 'emacs-lisp-mode)
-          (let ((sym (intern candidate)))
-            (cond ((fboundp sym) 'Function)
-                  ((featurep sym) 'Module)
-                  ((facep sym) 'Color)
-                  ((boundp sym) 'Variable)
-                  ((symbolp sym) 'Text)
-                  (t . nil)))))
-
-      (with-eval-after-load 'all-the-icons
-        (declare-function all-the-icons-faicon 'all-the-icons)
-        (declare-function all-the-icons-fileicon 'all-the-icons)
-        (declare-function all-the-icons-material 'all-the-icons)
-        (declare-function all-the-icons-octicon 'all-the-icons)
-        (setq company-box-icons-all-the-icons
-              `((Unknown . ,(all-the-icons-material "find_in_page" :height 0.7 :v-adjust -0.15))
-                (Text . ,(all-the-icons-faicon "book" :height 0.68 :v-adjust -0.15))
-                (Method . ,(all-the-icons-faicon "cube" :height 0.7 :v-adjust -0.05 :face 'font-lock-constant-face))
-                (Function . ,(all-the-icons-faicon "cube" :height 0.7 :v-adjust -0.05 :face 'font-lock-constant-face))
-                (Constructor . ,(all-the-icons-faicon "cube" :height 0.7 :v-adjust -0.05 :face 'font-lock-constant-face))
-                (Field . ,(all-the-icons-faicon "tags" :height 0.65 :v-adjust -0.15 :face 'font-lock-warning-face))
-                (Variable . ,(all-the-icons-faicon "tag" :height 0.7 :v-adjust -0.05 :face 'font-lock-warning-face))
-                (Class . ,(all-the-icons-faicon "clone" :height 0.65 :v-adjust 0.01 :face 'font-lock-constant-face))
-                (Interface . ,(all-the-icons-faicon "clone" :height 0.65 :v-adjust 0.01))
-                (Module . ,(all-the-icons-octicon "package" :height 0.7 :v-adjust -0.15))
-                (Property . ,(all-the-icons-octicon "package" :height 0.7 :v-adjust -0.05 :face 'font-lock-warning-face)) ;; Golang module
-                (Unit . ,(all-the-icons-material "settings_system_daydream" :height 0.7 :v-adjust -0.15))
-                (Value . ,(all-the-icons-material "format_align_right" :height 0.7 :v-adjust -0.15 :face 'font-lock-constant-face))
-                (Enum . ,(all-the-icons-material "storage" :height 0.7 :v-adjust -0.15 :face 'all-the-icons-orange))
-                (Keyword . ,(all-the-icons-material "filter_center_focus" :height 0.7 :v-adjust -0.15))
-                (Snippet . ,(all-the-icons-faicon "code" :height 0.7 :v-adjust 0.02 :face 'font-lock-variable-name-face))
-                (Color . ,(all-the-icons-material "palette" :height 0.7 :v-adjust -0.15))
-                (File . ,(all-the-icons-faicon "file-o" :height 0.7 :v-adjust -0.05))
-                (Reference . ,(all-the-icons-material "collections_bookmark" :height 0.7 :v-adjust -0.15))
-                (Folder . ,(all-the-icons-octicon "file-directory" :height 0.7 :v-adjust -0.05))
-                (EnumMember . ,(all-the-icons-material "format_align_right" :height 0.7 :v-adjust -0.15 :face 'all-the-icons-blueb))
-                (Constant . ,(all-the-icons-faicon "tag" :height 0.7 :v-adjust -0.05))
-                (Struct . ,(all-the-icons-faicon "clone" :height 0.65 :v-adjust 0.01 :face 'font-lock-constant-face))
-                (Event . ,(all-the-icons-faicon "bolt" :height 0.7 :v-adjust -0.05 :face 'all-the-icons-orange))
-                (Operator . ,(all-the-icons-fileicon "typedoc" :height 0.65 :v-adjust 0.05))
-                (TypeParameter . ,(all-the-icons-faicon "hashtag" :height 0.65 :v-adjust 0.07 :face 'font-lock-const-face))
-                (Template . ,(all-the-icons-faicon "code" :height 0.7 :v-adjust 0.02 :face 'font-lock-variable-name-face))))))
-    ;; Show quick tooltip
-    (use-package company-quickhelp
-        :defines company-quickhelp-delay
-        :bind (:map company-active-map
-                    ("M-h" . company-quickhelp-manual-begin))
-        :hook (global-company-mode . company-quickhelp-mode)
-        :custom (company-quickhelp-delay 0.8)))
-
-#+end_src
-
-** Yasnippet
-
-#+begin_src emacs-lisp
-  (use-package yasnippet
-        :defer t
-        :straight (:build t)
-        :init
-        (yas-global-mode)
-        :hook ((prog-mode . yas-minor-mode)
-               (text-mode . yas-minor-mode)))
-
-   (use-package yasnippet-snippets
-      :defer t
-      :after yasnippet
-      :straight (:build t))
-
-(use-package yatemplate
-  :defer t
-  :after yasnippet
-  :straight (:build t))
-
-(use-package consult-yasnippet
-  :defer t
-  :after yasnippet
-  :straight (:build t))
-#+end_src
-
-** Which-key
-
-#+begin_src emacs-lisp
-
   (use-package which-key
-    :straight (:build t)
-    :defer t
-    :init (which-key-mode)
-    :diminish which-key-mode
-    :config
-    (setq which-key-idle-delay 0.4
-        which-key-idle-secondary-delay 0.4))
-
-#+end_src
-
-** Flycheck
-
-#+begin_src emacs-lisp
-(use-package flycheck
-  :straight (:build t)
-  :defer t
-  :init
-  (global-flycheck-mode)
-  :config
-  (setq flycheck-emacs-lisp-load-path 'inherit)
-
-  ;; Rerunning checks on every newline is a mote excessive.
-  (delq 'new-line flycheck-check-syntax-automatically)
-  ;; And don’t recheck on idle as often
-  (setq flycheck-idle-change-delay 2.0)
-
-  ;; For the above functionality, check syntax in a buffer that you
-  ;; switched to on briefly. This allows “refreshing” the syntax check
-  ;; state for several buffers quickly after e.g. changing a config
-  ;; file.
-  (setq flycheck-buffer-switch-check-intermediate-buffers t)
-
-  ;; Display errors a little quicker (default is 0.9s)
-  (setq flycheck-display-errors-delay 0.2))
-
-(use-package flycheck-posframe
-  :straight (:build t)
-  :hook (flycheck-mode . flycheck-posframe-mode)
-  :config
-  (setq flycheck-posframe-warning-prefix "! "
-        flycheck-posframe-info-prefix    "··· "
-        flycheck-posframe-error-prefix   "X "))
-
-#+end_src
-
-* Keybindings
-
-** General
-
-#+begin_src emacs-lisp
-
-  (use-package general
-  :defer t
-  :straight (:build t)
-  :init
-  (general-auto-unbind-keys))
-
-#+end_src
-
-** Evil
-
-#+begin_src emacs-lisp
-
-  (use-package evil
-    :straight (:build t)
     :init
-    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
-    (setq evil-want-keybinding nil)
-    :config
-    (evil-mode 1))
+    (which-key-mode 1)
+    :diminish
+    :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
+    (which-key-sort-uppercase-first nil)
+    (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
+    (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
+    (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
+    (which-key-max-description-length 25))
+#+end_src
 
-  (use-package evil-collection
-    :after evil
-    :straight (:build t)
-    :config
-    (evil-collection-init))
+** Org Mode
 
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'org-indent-mode) ;; Indent text
+  
+  (use-package org-superstar
+    :after org
+    :hook (org-mode . org-superstar-mode))
+
+  (with-eval-after-load 'org
+    (require 'org-tempo))
+#+end_src
+
+* Performance Measures
+
+#+begin_src emacs-lisp
+  (add-hook 'emacs-startup-hook
+	    (lambda ()
+	      (message "Icemacs loaded in %s with %d garbage collections."
+		       (format "%.2f seconds"
+			       (float-time
+				(time-subtract (current-time) before-init-time)))
+		       gcs-done)))
 #+end_src
